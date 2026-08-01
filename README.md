@@ -13,6 +13,7 @@ Unauthorized port scanning may be illegal in your jurisdiction.
 - Sequential TCP connect scan
 - Configurable port range
 - Simple command-line interface
+- Multithreaded scanning (configurable number of threads)
 
 ## Requirements
 
@@ -21,7 +22,7 @@ Unauthorized port scanning may be illegal in your jurisdiction.
 ## Usage
 
 ```bash
-python port_scanner.py <target_ip> <start_port> <end_port>
+python port_scanner.py <target_ip> <start_port> <end_port> [threads]
 ```
 
 ### Example
@@ -37,7 +38,7 @@ The scanner attempts a TCP connection to each port in the given range using
 
 ## Roadmap
 
-- [ ] Multithreading for faster scans
+- [x] Multithreading for faster scans
 - [ ] Banner grabbing (service/version detection)
 - [ ] JSON/CSV export
 - [ ] Command-line flags (argparse)
