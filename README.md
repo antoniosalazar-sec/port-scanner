@@ -14,6 +14,7 @@ Unauthorized port scanning may be illegal in your jurisdiction.
 - Configurable port range
 - Simple command-line interface
 - Multithreaded scanning (configurable number of threads)
+- Banner grabbing for service identification
 
 ## Requirements
 
@@ -39,7 +40,7 @@ The scanner attempts a TCP connection to each port in the given range using
 ## Roadmap
 
 - [x] Multithreading for faster scans
-- [ ] Banner grabbing (service/version detection)
+- [x] Banner grabbing (service/version detection)
 - [ ] JSON/CSV export
 - [ ] Command-line flags (argparse)
 
