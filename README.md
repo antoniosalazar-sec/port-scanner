@@ -15,6 +15,8 @@ Unauthorized port scanning may be illegal in your jurisdiction.
 - Simple command-line interface
 - Multithreaded scanning (configurable number of threads)
 - Banner grabbing for service identification
+- Argparse-based CLI with input validation
+- Graceful cancellation with Ctrl+C
 
 ## Requirements
 
@@ -23,26 +25,44 @@ Unauthorized port scanning may be illegal in your jurisdiction.
 ## Usage
 
 ```bash
-python port_scanner.py <target_ip> <start_port> <end_port> [threads]
+python port_scanner.py <target> [-p PORTS] [-t THREADS] [--timeout SECONDS]
 ```
 
 ### Example
 
 ```bash
-python port_scanner.py 192.168.1.1 1 1000
+python port_scanner.py scanme.nmap.org -p 1-1000 -t 50 --timeout 2
 ```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `target` | IP address or hostname to scan | required |
+| `-p`, `--ports` | Port range, e.g. `1-1000` or `80` | `1-1024` |
+| `-t`, `--threads` | Number of concurrent threads | `100` |
+| `--timeout` | Connection timeout in seconds | `1.0` |
 
 ## How it works
 
-The scanner attempts a TCP connection to each port in the given range using
-`socket.connect_ex()`. If the connection succeeds, the port is reported as open.
+The scanner resolves the target hostname to an IP address once, then attempts
+a TCP connection to each port in the given range using `socket.connect_ex()`
+across a pool of worker threads. If a connection succeeds, it also tries to
+read a service banner from the open port before reporting it.
+
+## Notes
+
+High thread counts against a single target may trigger rate limiting on the
+server side, causing open ports to appear closed. If you get inconsistent
+results, try lowering `-t` and increasing `--timeout`.
 
 ## Roadmap
 
 - [x] Multithreading for faster scans
 - [x] Banner grabbing (service/version detection)
+- [x] Command-line flags (argparse)
 - [ ] JSON/CSV export
-- [ ] Command-line flags (argparse)
+- [ ] Unit tests
 
 ## License
 
