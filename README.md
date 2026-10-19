@@ -26,7 +26,7 @@ Unauthorized port scanning may be illegal in your jurisdiction.
 ## Usage
 
 ```bash
-python port_scanner.py <target> [-p PORTS] [-t THREADS] [--timeout SECONDS]
+python port_scanner.py <target> [-p PORTS] [-t THREADS] [--timeout SECONDS] [-o FILE]
 ```
 
 ### Example
