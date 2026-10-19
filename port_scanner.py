@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
-TCP Port Scanner - Version 4 (with argparse CLI)
-Usage: python port_scanner.py <target> -p <start-end> [-t threads]
+TCP Port Scanner - Version 5 (with JSON/CSV export)
+Usage: python port_scanner.py <target> [-p PORTS] [-t THREADS] [--timeout SECONDS] [-o FILE]
 """
 
 import argparse
+import csv
+import json
+import os
 import socket
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 
 
 def grab_banner(sock):
@@ -85,6 +89,49 @@ def parse_port_range(port_range_str):
     return (start_port, end_port)
 
 
+def export_json(filepath, metadata, open_ports):
+    """
+    Writes the scan results to a JSON file: a "scan" section with
+    metadata about the scan and a "results" list with one entry per
+    open port.
+    """
+    data = {
+        "scan": metadata,
+        "results": [
+            {"port": port, "banner": banner} for port, banner in open_ports
+        ],
+    }
+    # encoding="utf-8" avoids surprises on Windows, where the default
+    # encoding can be different. indent=2 makes the file human-readable.
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def export_csv(filepath, open_ports):
+    """
+    Writes the scan results to a CSV file with the columns: port, banner.
+    """
+    # newline="" is required by the csv module so it controls line
+    # endings itself (otherwise Windows can add blank lines between rows).
+    with open(filepath, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["port", "banner"])
+        writer.writerows(open_ports)
+
+
+def output_file_type(filepath):
+    """
+    argparse validator for -o/--output: only accepts .json or .csv files.
+    Returns the path unchanged if the extension is valid.
+    """
+    extension = os.path.splitext(filepath)[1].lower()
+    if extension not in (".json", ".csv"):
+        raise argparse.ArgumentTypeError(
+            f"Output file must end in .json or .csv, got: '{filepath}'"
+        )
+    return filepath
+
+
 def build_arg_parser():
     """
     Builds and returns the argparse parser that defines all the
@@ -122,6 +169,13 @@ def build_arg_parser():
         help="Connection timeout in seconds (default: 1.0)"
     )
 
+    parser.add_argument(
+        "-o", "--output",
+        type=output_file_type,
+        default=None,
+        help="Save results to a file (.json or .csv)"
+    )
+
     return parser
 
 
@@ -146,6 +200,7 @@ def main():
     print(f"Scanning {args.target} ({target_ip}) from port {start_port} to {end_port}")
     print(f"Using {args.threads} threads, {args.timeout}s timeout\n")
 
+    scan_started = datetime.now()
     open_ports = []
     ports_to_scan = range(start_port, end_port + 1)
 
@@ -180,6 +235,26 @@ def main():
             print(f"  {port}: {banner}")
         else:
             print(f"  {port}: (no banner)")
+
+    if args.output:
+        metadata = {
+            "target": args.target,
+            "ip": target_ip,
+            "port_range": f"{start_port}-{end_port}",
+            "threads": args.threads,
+            "timeout": args.timeout,
+            "started_at": scan_started.isoformat(timespec="seconds"),
+            "finished_at": datetime.now().isoformat(timespec="seconds"),
+        }
+        try:
+            if args.output.lower().endswith(".json"):
+                export_json(args.output, metadata, open_ports)
+            else:
+                export_csv(args.output, open_ports)
+            print(f"\nResults saved to {args.output}")
+        except OSError as e:
+            print(f"\nError: could not write to '{args.output}': {e}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
