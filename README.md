@@ -32,7 +32,7 @@ python port_scanner.py <target> [-p PORTS] [-t THREADS] [--timeout SECONDS] [-o 
 ### Example
 
 ```bash
-python port_scanner.py scanme.nmap.org -p 1-1000 -t 50 --timeout 2
+python port_scanner.py scanme.nmap.org -p 1-1000 -t 50 --timeout 2 -o results.jsom
 ```
 
 ### Options
