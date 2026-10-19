@@ -17,6 +17,7 @@ Unauthorized port scanning may be illegal in your jurisdiction.
 - Banner grabbing for service identification
 - Argparse-based CLI with input validation
 - Graceful cancellation with Ctrl+C
+- Export results to JSON or CSV
 
 ## Requirements
 
@@ -42,6 +43,7 @@ python port_scanner.py scanme.nmap.org -p 1-1000 -t 50 --timeout 2
 | `-p`, `--ports` | Port range, e.g. `1-1000` or `80` | `1-1024` |
 | `-t`, `--threads` | Number of concurrent threads | `100` |
 | `--timeout` | Connection timeout in seconds | `1.0` |
+| `-o`, `--output` | Save results to a `.json` or `.csv` file | none |
 
 ## How it works
 
@@ -61,7 +63,7 @@ results, try lowering `-t` and increasing `--timeout`.
 - [x] Multithreading for faster scans
 - [x] Banner grabbing (service/version detection)
 - [x] Command-line flags (argparse)
-- [ ] JSON/CSV export
+- [x] JSON/CSV export
 - [ ] Unit tests
 
 ## License
